@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>World Boyfriend Day Celebration</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & Dancing Script -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- FontAwesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            cursive: ['Dancing Script', 'cursive'],
+            heading: ['Poppins', 'sans-serif'],
+          },
+          colors: {
+            roseCustom: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              300: '#fca5a5',
+              500: '#f43f5e',
+              600: '#e11d48',
+              800: '#9f1239',
+            }
+          },
+          animation: {
+            'float-slow': 'float 6s ease-in-out infinite',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'bounce-gentle': 'bounceGentle 2s infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+              '50%': { transform: 'translateY(-15px) rotate(3deg)' },
+            },
+            bounceGentle: {
+              '0%, 100%': { transform: 'translateY(-3%)' },
+              '50%': { transform: 'translateY(0)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar & Animations */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.05);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(244, 63, 94, 0.4);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(244, 63, 94, 0.7);
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+    .dark .glass-card {
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    /* Perspective for Flip Cards */
+    .perspective-1000 {
+      perspective: 1000px;
+    }
+    .transform-style-preserve-3d {
+      transform-style: preserve-3d;
+    }
+    .backface-hidden {
+      backface-visibility: hidden;
+    }
+    .rotate-y-180 {
+      transform: rotateY(180deg);
+    }
+    /* Floating background canvas */
+    #bgCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-rose-50 via-pink-50 to-red-100 dark:from-slate-900 dark:via-purple-950 dark:to-slate-900 text-slate-800 dark:text-slate-100 min-h-screen font-sans transition-colors duration-500 relative overflow-x-hidden">
+
+  <!-- Floating Background Particles Canvas -->
+  <canvas id="bgCanvas"></canvas>
+
+  <!-- Top Floating Control Bar -->
+  <nav class="sticky top-0 z-40 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border-b border-rose-100 dark:border-slate-800 px-4 py-3 transition-all">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl">❤️</span>
+        <h1 class="font-bold text-lg md:text-xl bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent font-heading">
+          Boyfriend Day Creator
+        </h1>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <!-- Audio Ambient Toggle -->
+        <button id="btnAudioToggle" onclick="toggleAudio()" class="px-3 py-1.5 rounded-full bg-rose-100 dark:bg-slate-800 text-rose-600 dark:text-rose-400 text-xs font-semibold hover:bg-rose-200 transition flex items-center gap-1.5" title="Play Romantic Melody">
+          <i id="audioIcon" class="fas fa-music"></i>
+          <span id="audioText" class="hidden sm:inline">Play Melody</span>
+        </button>
+
+        <!-- Customizer Drawer Toggle -->
+        <button onclick="toggleCustomizer()" class="px-3.5 py-1.5 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold shadow-md shadow-rose-500/20 transition flex items-center gap-1.5">
+          <i class="fas fa-sliders"></i>
+          <span>Customize</span>
+        </button>
+
+        <!-- Export / Share Button -->
+        <button onclick="openExportModal()" class="px-3 py-1.5 rounded-full bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 text-white text-xs font-semibold transition flex items-center gap-1.5">
+          <i class="fas fa-share-nodes"></i>
+          <span class="hidden sm:inline">Save & Share</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTAINER -->
+  <main class="relative z-10 max-w-5xl mx-auto px-4 py-8 space-y-12">
+
+    <!-- HERO SECTION -->
+    <section class="text-center relative">
+      <div class="inline-block mb-3 px-4 py-1.5 rounded-full bg-rose-100/80 dark:bg-rose-900/40 text-rose-600 dark:text-rose-300 font-semibold text-xs tracking-wide uppercase border border-rose-200 dark:border-rose-800/50 shadow-sm">
+        ✨ Happy World Boyfriend Day ✨
+      </div>
+
+      <h2 id="displayTitle" class="text-4xl md:text-6xl font-extrabold font-heading text-slate-900 dark:text-white tracking-tight mb-2">
+        To the boy who always makes me smile, <span id="displayPartnerName" class="bg-gradient-to-r from-rose-500 to-pink-500 bg-clip-text text-transparent">Arun</span> 💕
+      </h2>
+      <p id="displayNickname" class="text-lg md:text-xl font-cursive text-rose-600 dark:text-rose-400 font-bold mb-6">
+        "Cute Boy"
+      </p>
+
+      <!-- Couple Photo Display Frame -->
+      <div class="relative mx-auto w-48 h-48 md:w-64 md:h-64 mb-6 group">
+        <div class="absolute -inset-1 rounded-full bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 blur-md opacity-70 group-hover:opacity-100 transition duration-500 animate-pulse-slow"></div>
+        <img id="displayPhoto" src="https://drive.google.com/uc?export=view&id=1L6x9HKWhUuGJd5lDhj4PwwYC8XC_WXfE" alt="Couple" class="relative w-full h-full object-cover rounded-full border-4 border-white dark:border-slate-800 shadow-xl transition transform group-hover:scale-105 duration-300">
+        <button onclick="triggerPhotoUpload()" class="absolute bottom-2 right-2 p-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-full shadow-lg text-xs transition" title="Change Photo">
+          <i class="fas fa-camera"></i>
+        </button>
+        <input type="file" id="filePhotoInput" class="hidden" accept="image/*" onchange="handleImageUpload(event)">
+      </div>
+
+      <!-- Anniversary Badge -->
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl glass-card text-xs md:text-sm font-semibold shadow-sm">
+        <i class="fas fa-calendar-heart text-rose-500"></i>
+        <span>Together Since: <strong id="displayStartDateText" class="text-rose-600 dark:text-rose-400">August 19, 2026</strong></span>
+      </div>
+
+      <!-- Personal Message Box -->
+      <div class="mt-6 max-w-2xl mx-auto p-6 rounded-3xl glass-card shadow-lg relative border border-rose-100 dark:border-slate-800">
+        <i class="fas fa-quote-left text-2xl text-rose-300 dark:text-rose-800 absolute top-4 left-4"></i>
+        <p id="displayMessage" class="text-slate-700 dark:text-slate-200 italic font-medium leading-relaxed text-sm md:text-base px-6">
+          "You make my days a little brighter just by bein in them . I love how you make me smile without even trying and somehow you've become such a special part of my life. Happy Boyfriend Day!"
+</p>
+        <i class="fas fa-quote-right text-2xl text-rose-300 dark:text-rose-800 absolute bottom-4 right-4"></i>
+      </div>
+    </section>
+
+    <!-- LIVE RELATIONSHIP TIMER SECTION -->
+    <section class="glass-card p-6 md:p-8 rounded-3xl shadow-xl text-center">
+      <h3 class="text-lg md:text-xl font-bold font-heading mb-1 text-slate-800 dark:text-slate-100 flex items-center justify-center gap-2">
+        <i class="fas fa-stopwatch text-rose-500"></i> <span id="timerHeading">Our Relationship Time</span>
+      </h3>
+      <p id="timerSubtext" class="text-xs text-slate-500 dark:text-slate-400 mb-6">Counting every precious second together</p>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 md:gap-4">
+        <div class="bg-rose-50 dark:bg-slate-800/80 p-3.5 rounded-2xl border border-rose-100 dark:border-slate-700">
+          <span id="counterYears" class="block text-2xl md:text-3xl font-extrabold text-rose-600 dark:text-rose-400">0</span>
+          <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Years</span>
+        </div>
+        <div class="bg-rose-50 dark:bg-slate-800/80 p-3.5 rounded-2xl border border-rose-100 dark:border-slate-700">
+          <span id="counterMonths" class="block text-2xl md:text-3xl font-extrabold text-rose-600 dark:text-rose-400">0</span>
+          <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Months</span>
+        </div>
+        <div class="bg-rose-50 dark:bg-slate-800/80 p-3.5 rounded-2xl border border-rose-100 dark:border-slate-700">
+          <span id="counterDays" class="block text-2xl md:text-3xl font-extrabold text-rose-600 dark:text-rose-400">0</span>
+          <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Days</span>
+        </div>
+        <div class="bg-rose-50 dark:bg-slate-800/80 p-3.5 rounded-2xl border border-rose-100 dark:border-slate-700">
+          <span id="counterHours" class="block text-2xl md:text-3xl font-extrabold text-rose-600 dark:text-rose-400">0</span>
+          <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Hours</span>
+        </div>
+        <div class="bg-rose-50 dark:bg-slate-800/80 p-3.5 rounded-2xl border border-rose-100 dark:border-slate-700">
+          <span id="counterMinutes" class="block text-2xl md:text-3xl font-extrabold text-rose-600 dark:text-rose-400">0</span>
+          <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Mins</span>
+        </div>
+        <div class="bg-rose-50 dark:bg-slate-800/80 p-3.5 rounded-2xl border border-rose-100 dark:border-slate-700">
+          <span id="counterSeconds" class="block text-2xl md:text-3xl font-extrabold text-rose-600 dark:text-rose-400">0</span>
+          <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Secs</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- REASONS WHY I LOVE YOU (INTERACTIVE FLIP CARDS) -->
+    <section class="space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-xl md:text-2xl font-bold font-heading flex items-center gap-2">
+            <i class="fas fa-heart text-rose-500"></i> Reasons Why I Love You
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Tap a card to flip and reveal the secret</p>
+        </div>
+        <button onclick="addCustomReasonPrompt()" class="px-3 py-1.5 bg-rose-100 dark:bg-slate-800 text-rose-600 dark:text-rose-300 rounded-xl text-xs font-semibold hover:bg-rose-200 transition">
+          <i class="fas fa-plus"></i> Add Reason
+        </button>
+      </div>
+
+      <div id="reasonsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <!-- Rendered dynamically via JS -->
+      </div>
+    </section>
+
+    <!-- DIGITAL LOVE COUPONS BOOK -->
+    <section class="space-y-4">
+      <div>
+        <h3 class="text-xl md:text-2xl font-bold font-heading flex items-center gap-2">
+          <i class="fas fa-ticket text-rose-500"></i> Boyfriend Love Coupons
+        </h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Redeemable anytime for special rewards!</p>
+      </div>
+
+      <div id="couponsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Rendered dynamically via JS -->
+      </div>
+    </section>
+
+    <!-- TRIVIA / BOYFRIEND QUIZ -->
+    <section class="glass-card p-6 md:p-8 rounded-3xl shadow-xl space-y-6">
+      <div class="text-center">
+        <h3 class="text-xl md:text-2xl font-bold font-heading flex items-center justify-center gap-2">
+          <i class="fas fa-gamepad text-rose-500"></i> Relationship Mini Quiz
+        </h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Test how well you know our love story!</p>
+      </div>
+
+      <div id="quizContainer" class="max-w-xl mx-auto space-y-4">
+        <!-- Dynamic Quiz Card -->
+      </div>
+    </section>
+
+    <!-- POLAROID MEMORY GALLERY -->
+    <section class="space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-xl md:text-2xl font-bold font-heading flex items-center gap-2">
+            <i class="fas fa-images text-rose-500"></i> Our Favorite Memories
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Snapshot moments from our journey</p>
+        </div>
+        <button onclick="addMemoryPrompt()" class="px-3 py-1.5 bg-rose-100 dark:bg-slate-800 text-rose-600 dark:text-rose-300 rounded-xl text-xs font-semibold hover:bg-rose-200 transition">
+          <i class="fas fa-plus"></i> Add Memory
+        </button>
+      </div>
+
+      <div id="memoriesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- CUSTOMIZATION DRAWER OVERLAY -->
+  <div id="customizerDrawer" class="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white dark:bg-slate-900 shadow-2xl border-l border-rose-100 dark:border-slate-800 transform translate-x-full transition-transform duration-300 overflow-y-auto">
+    <div class="p-6 space-y-6">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
+        <h3 class="text-lg font-bold font-heading flex items-center gap-2">
+          <i class="fas fa-sliders text-rose-500"></i> Personalize Website
+        </h3>
+        <button onclick="toggleCustomizer()" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <i class="fas fa-xmark text-xl"></i>
+        </button>
+      </div>
+
+      <!-- Controls Form -->
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Boyfriend's Name</label>
+          <input type="text" id="inputPartnerName" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-rose-400 focus:outline-none" value="Arun" oninput="updateStateFromInputs()">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Sweet Nickname</label>
+          <input type="text" id="inputNickname" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-rose-400 focus:outline-none" value="Cute Boy" oninput="updateStateFromInputs()">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Anniversary / Start Date</label>
+          <input type="date" id="inputStartDate" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-rose-400 focus:outline-none" value="2026-08-19" onchange="updateStateFromInputs()">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Personal Romantic Note</label>
+          <textarea id="inputMessage" rows="3" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-rose-400 focus:outline-none" oninput="updateStateFromInputs()">Thank you for being my rock, my best friend, and my biggest supporter. Every day with you is an adventure I never want to end. Happy Boyfriend Day!</textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Photo Image URL</label>
+          <input type="text" id="inputPhotoUrl" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-rose-400 focus:outline-none" value="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=800&q=80" oninput="updateStateFromInputs()">
+        </div>
+
+        <!-- Color Palette Picker -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">Color Theme</label>
+          <div class="grid grid-cols-3 gap-2">
+            <button onclick="setTheme('rose')" class="p-2.5 rounded-xl border text-xs font-medium bg-rose-100 text-rose-700 border-rose-300 hover:scale-105 transition">Rose Pink</button>
+            <button onclick="setTheme('midnight')" class="p-2.5 rounded-xl border text-xs font-medium bg-slate-900 text-purple-300 border-slate-700 hover:scale-105 transition">Midnight</button>
+            <button onclick="setTheme('sunset')" class="p-2.5 rounded-xl border text-xs font-medium bg-amber-100 text-amber-800 border-amber-300 hover:scale-105 transition">Sunset</button>
+          </div>
+        </div>
+
+        <!-- Background Animation Style -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">Floating Particle Style</label>
+          <select id="particleSelect" onchange="changeParticleType(this.value)" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+            <option value="hearts">Floating Hearts 💕</option>
+            <option value="stars">Twinkling Stars ✨</option>
+            <option value="bubbles">Soft Bubbles 🫧</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex gap-2">
+        <button onclick="triggerConfetti()" class="flex-1 py-2.5 bg-rose-500 text-white font-semibold rounded-xl text-xs hover:bg-rose-600 transition">
+          🎉 Trigger Celebration
+        </button>
+        <button onclick="toggleCustomizer()" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold rounded-xl text-xs">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPORT / SAVE MODAL -->
+  <div id="exportModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden">
+    <div class="glass-card max-w-md w-full p-6 rounded-3xl shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold font-heading text-slate-900 dark:text-white">Save & Share Website</h3>
+        <button onclick="closeExportModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+      <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+        You can copy the customized code or download this as a complete standalone HTML page to send directly to your boyfriend!
+      </p>
+
+      <div class="space-y-2">
+        <button onclick="downloadHtmlFile()" class="w-full py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-xs font-semibold shadow-md transition flex items-center justify-center gap-2">
+          <i class="fas fa-download"></i> Download `.html` File
+        </button>
+        <button onclick="copyFullCode()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2">
+          <i class="fas fa-copy"></i> Copy Web Code to Clipboard
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <i class="fas fa-circle-check text-green-400"></i>
+    <span id="toastMsg">Action completed!</span>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // Application State
+    const appState = {
+      partnerName: "Arun",
+      nickname: "Cute Boy",
+      startDate: "2026-08-19",
+      personalMessage: "You make my days a little brighter just by being in them. 🥹❤️ I love how you make me smile without even trying, and somehow you’ve become such a special part of my life.Happy Boyfriend Day  🫶🏻💕!",
+      couplePhoto: "https://i.postimg.cc/mksVKHdp/couple.jpg",
+
+      reasons: [
+        { id: 1, title: "Your Kindness", detail: "How you always go out of your way to make me smile." },
+        { id: 2, title: "Your Warm Hugs", detail: "The safest place in the world is inside your tight warm embrace." },
+        { id: 3, title: "Your Sense of Humor", detail: "Even on tough days, your silly jokes always make my heart melt." },
+        { id: 4, title: "Your gaze", detail: "The way you look at me like I'm the only person in the room." },
+        { id: 5, title: "Our Late Night Talks", detail: "Talking with you until 2 AM about everything and nothing at all." },
+        { id: 6, title: "Simply Being You", detail: "Because you are uniquely, authentically, perfectly you!" }
+      ],
+      coupons: [
+        { id: 1, title: "1x Massage Session", desc: "15 minutes of relaxing back/shoulder massage on demand.", redeemed: false },
+        { id: 2, title: "Movie Night Pick", desc: "You get total control of the TV remote & movie choice tonight!", redeemed: false },
+        { id: 3, title: "Favorite Homemade Meal", desc: "Redeemable for your favorite dinner cooked with love.", redeemed: false },
+        { id: 4, title: "Get Out of Argument Free", desc: "Instant win button for one silly minor debate!", redeemed: false }
+      ],
+      memories: [
+        { id: 1, caption: "Our First Date 💕", url: "https://i.postimg.cc/Y0rY1fDG/first.jpg" },
+        { id: 2, caption: "Clay Date 🌅", url: "https://i.postimg.cc/YCZ6JFjc/clay.jpg" },
+        { id: 3, caption: "On the way to see you ✨", url: "https://i.postimg.cc/kXhKbSQq/lillies.jpg"}
+      ],
+      quiz: [
+        { q: "Where was our memorable first date?", options: ["Cafe", "Park", "Shopping", "Restaurant"], answer: 1 },
+        { q: "Who said 'I love you' first?", options: ["You did!", "I did!", "Both at same time", "Still waiting!"], answer: 1 },
+        { q: "What is my absolute favorite thing about you?", options: ["Your smile", "Your heart", "Your hair", "All of the above!"], answer: 3 }
+      ],
+      currentQuizIdx: 0,
+      quizScore: 0
+    };
+
+    // Initialize Page
+    window.onload = function() {
+      renderAll();
+      startLiveTimer();
+      initParticles();
+      triggerConfetti();
+    };
+
+    function renderAll() {
+      // Hero Elements
+      document.getElementById('displayPartnerName').innerText = appState.partnerName;
+      document.getElementById('displayNickname').innerText = `"${appState.nickname}"`;
+      document.getElementById('displayMessage').innerText = appState.personalMessage;
+      document.getElementById('displayPhoto').src = appState.couplePhoto;
+
+      // Date Formatting
+      const dateObj = new Date(appState.startDate);
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      const formattedDate = isNaN(dateObj.getTime()) ? appState.startDate : dateObj.toLocaleDateString('en-US', options);
+      document.getElementById('displayStartDateText').innerText = formattedDate;
+
+      // Inputs sync
+      document.getElementById('inputPartnerName').value = appState.partnerName;
+      document.getElementById('inputNickname').value = appState.nickname;
+      document.getElementById('inputStartDate').value = appState.startDate;
+      document.getElementById('inputMessage').value = appState.personalMessage;
+      document.getElementById('inputPhotoUrl').value = appState.couplePhoto;
+
+      renderReasons();
+      renderCoupons();
+      renderMemories();
+      renderQuiz();
+    }
+
+    // Update state from inputs
+    function updateStateFromInputs() {
+      appState.partnerName = document.getElementById('inputPartnerName').value || "Arun";
+      appState.nickname = document.getElementById('inputNickname').value || "Cute boy";
+      appState.startDate = document.getElementById('inputStartDate').value || "2026-08-19";
+      appState.personalMessage = document.getElementById('inputMessage').value || "";
+      appState.couplePhoto = document.getElementById('inputPhotoUrl').value || appState.couplePhoto;
+
+      renderAll();
+    }
+
+    // Live Anniversary Countdown & Time Tracker
+    function startLiveTimer() {
+      setInterval(() => {
+        const start = new Date(appState.startDate + 'T00:00:00');
+        const now = new Date();
+        const isFuture = start > now;
+
+        let diff = Math.abs(now - start);
+
+        if (isFuture) {
+          document.getElementById('timerHeading').innerText = "Countdown to Our Anniversary";
+          document.getElementById('timerSubtext').innerText = "Counting down the days until our special journey!";
+        } else {
+          document.getElementById('timerHeading').innerText = "Our Relationship Time";
+          document.getElementById('timerSubtext').innerText = "Counting every precious second together";
+        }
+
+        const seconds = Math.floor((diff / 1000) % 60);
+        const minutes = Math.floor((diff / 1000 / 60) % 60);
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const daysTotal = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+        const years = Math.floor(daysTotal / 365);
+        const months = Math.floor((daysTotal % 365) / 30);
+        const days = Math.floor((daysTotal % 365) % 30);
+
+        document.getElementById('counterYears').innerText = years;
+        document.getElementById('counterMonths').innerText = months;
+        document.getElementById('counterDays').innerText = days;
+        document.getElementById('counterHours').innerText = hours;
+        document.getElementById('counterMinutes').innerText = minutes;
+        document.getElementById('counterSeconds').innerText = seconds;
+      }, 1000);
+    }
+
+    // Render Reasons Flip Cards
+    function renderReasons() {
+      const grid = document.getElementById('reasonsGrid');
+      grid.innerHTML = appState.reasons.map((r, i) => `
+        <div class="perspective-1000 h-40 cursor-pointer" onclick="flipCard(this)">
+          <div class="relative w-full h-full duration-500 transform-style-preserve-3d transition-transform rounded-2xl shadow-md border border-rose-100 dark:border-slate-800">
+            <!-- Front -->
+            <div class="absolute inset-0 w-full h-full bg-white dark:bg-slate-800 rounded-2xl p-4 flex flex-col items-center justify-center text-center backface-hidden">
+              <span class="text-rose-500 font-bold text-xs uppercase tracking-widest mb-1">Reason #${i+1}</span>
+              <h4 class="font-extrabold text-slate-800 dark:text-slate-100 font-heading text-base">${escapeHtml(r.title)}</h4>
+              <span class="text-[10px] text-rose-400 mt-2 font-medium">Click to flip ✨</span>
+            </div>
+            <!-- Back -->
+            <div class="absolute inset-0 w-full h-full bg-gradient-to-br from-rose-500 to-pink-600 text-white rounded-2xl p-4 flex flex-col items-center justify-center text-center rotate-y-180 backface-hidden">
+              <p class="text-xs md:text-sm font-medium leading-relaxed">${escapeHtml(r.detail)}</p>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function flipCard(el) {
+      const inner = el.querySelector('.transform-style-preserve-3d');
+      inner.classList.toggle('rotate-y-180');
+      playTone(400, 0.05);
+    }
+
+    function addCustomReasonPrompt() {
+      const title = prompt("Enter Reason Title (e.g. 'Your Smile'):");
+      if (!title) return;
+      const detail = prompt("Enter Description/Detail:");
+      if (!detail) return;
+
+      appState.reasons.push({ id: Date.now(), title, detail });
+      renderReasons();
+      showToast("Added new reason!");
+    }
+
+    function renderCoupons() {
+      const grid = document.getElementById('couponsGrid');
+      grid.innerHTML = appState.coupons.map((c) => `
+        <div class="glass-card p-5 rounded-2xl flex items-center justify-between border ${c.redeemed ? 'opacity-60 bg-gray-100 border-gray-300' : 'border-rose-200 dark:border-slate-700'} shadow-sm">
+          <div class="space-y-1 pr-3">
+            <h4 class="font-bold text-sm md:text-base ${c.redeemed ? 'line-through text-slate-500' : 'text-slate-900 dark:text-white'}">${escapeHtml(c.title)}</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400">${escapeHtml(c.desc)}</p>
+          </div>
+          <button onclick="redeemCoupon(${c.id})" class="px-3.5 py-2 rounded-xl text-xs font-bold transition flex-shrink-0 ${c.redeemed ? 'bg-slate-300 text-slate-600 cursor-not-allowed' : 'bg-rose-500 hover:bg-rose-600 text-white shadow-md shadow-rose-500/20'}">
+            ${c.redeemed ? 'Redeemed ✔' : 'Redeem 🎟️'}
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function redeemCoupon(id) {
+      const item = appState.coupons.find(c => c.id === id);
+      if (item && !item.redeemed) {
+        item.redeemed = true;
+        renderCoupons();
+        triggerConfetti();
+        showToast(`Redeemed coupon: "${item.title}"!`);
+      }
+    }
+
+    // Memories Gallery
+    function renderMemories() {
+      const grid = document.getElementById('memoriesGrid');
+      grid.innerHTML = appState.memories.map((m) => `
+        <div class="bg-white dark:bg-slate-800 p-3 pb-4 rounded-xl shadow-md border border-slate-200 dark:border-slate-700 transform hover:-rotate-1 hover:scale-105 transition duration-300">
+          <div class="h-44 w-full rounded-lg overflow-hidden mb-3 bg-slate-100">
+            <img src="${escapeHtml(m.url)}" alt="Memory" class="w-full h-full object-cover">
+          </div>
+          <p class="text-center font-cursive text-lg font-bold text-slate-800 dark:text-slate-200">${escapeHtml(m.caption)}</p>
+        </div>
+      `).join('');
+    }
+
+    function addMemoryPrompt() {
+      const caption = prompt("Enter Memory Caption:");
+      if (!caption) return;
+      const url = prompt("Enter Image URL (or leave default):", "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=600&q=80");
+      if (!url) return;
+
+      appState.memories.push({ id: Date.now(), caption, url });
+      renderMemories();
+      showToast("New memory added!");
+    }
+
+    function renderQuiz() {
+      const container = document.getElementById('quizContainer');
+      const q = appState.quiz[appState.currentQuizIdx];
+
+      if (!q) {
+        container.innerHTML = `
+          <div class="text-center py-6 space-y-3">
+            <span class="text-4xl">🏆</span>
+            <h4 class="text-xl font-bold font-heading">Quiz Complete!</h4>
+            <p class="text-sm text-slate-600 dark:text-slate-300">You scored <strong>${appState.quizScore}</strong> out of <strong>${appState.quiz.length}</strong>!</p>
+            <button onclick="restartQuiz()" class="px-4 py-2 bg-rose-500 text-white rounded-xl text-xs font-semibold hover:bg-rose-600 transition">
+              Try Again
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="space-y-4">
+          <div class="flex justify-between items-center text-xs text-rose-500 font-bold uppercase tracking-wider">
+            <span>Question ${appState.currentQuizIdx + 1} of ${appState.quiz.length}</span>
+            <span>Score: ${appState.quizScore}</span>
+          </div>
+          <h4 class="text-base md:text-lg font-bold text-slate-800 dark:text-slate-100">${escapeHtml(q.q)}</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            ${q.options.map((opt, idx) => `
+              <button onclick="submitQuizAnswer(${idx})" class="p-3 text-left rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-rose-100 dark:hover:bg-rose-950/50 hover:text-rose-600 dark:hover:text-rose-300 border border-slate-200 dark:border-slate-700 text-xs md:text-sm font-medium transition">
+                ${escapeHtml(opt)}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function submitQuizAnswer(selectedIdx) {
+      const q = appState.quiz[appState.currentQuizIdx];
+      if (selectedIdx === q.answer) {
+        appState.quizScore++;
+        playTone(600, 0.1);
+        showToast("Correct! ❤️");
+      } else {
+        playTone(200, 0.1);
+        showToast("Oops! Almost! 💕");
+      }
+      appState.currentQuizIdx++;
+      renderQuiz();
+    }
+
+    function restartQuiz() {
+      appState.currentQuizIdx = 0;
+      appState.quizScore = 0;
+      renderQuiz();
+    }
+
+    // Photo Upload Handling
+    function triggerPhotoUpload() {
+      document.getElementById('filePhotoInput').click();
+    }
+
+    function handleImageUpload(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          appState.couplePhoto = evt.target.result;
+          document.getElementById('displayPhoto').src = appState.couplePhoto;
+          document.getElementById('inputPhotoUrl').value = appState.couplePhoto;
+          showToast("Photo updated!");
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // Customizer Drawer Toggle
+    function toggleCustomizer() {
+      const drawer = document.getElementById('customizerDrawer');
+      drawer.classList.toggle('translate-x-full');
+    }
+
+    // Theme Switcher
+    function setTheme(theme) {
+      const body = document.body;
+      body.classList.remove('dark');
+      if (theme === 'midnight') {
+        body.classList.add('dark');
+      }
+      showToast(`Applied ${theme} theme!`);
+    }
+
+    let particleType = 'hearts';
+    let particles = [];
+
+    function changeParticleType(type) {
+      particleType = type;
+      initParticles();
+    }
+
+    function initParticles() {
+      const canvas = document.getElementById('bgCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      particles = [];
+      const count = 25;
+
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: Math.random() * 14 + 10,
+          speedY: Math.random() * 1 + 0.5,
+          opacity: Math.random() * 0.5 + 0.3
+        });
+      }
+    }
+
+    function animateParticles() {
+      const canvas = document.getElementById('bgCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach(p => {
+        p.y -= p.speedY;
+        if (p.y < -20) {
+          p.y = canvas.height + 20;
+          p.x = Math.random() * canvas.width;
+        }
+
+        ctx.globalAlpha = p.opacity;
+        ctx.font = `${p.size}px sans-serif`;
+
+        let char = '❤️';
+        if (particleType === 'stars') char = '✨';
+        if (particleType === 'bubbles') char = '🫧';
+
+        ctx.fillText(char, p.x, p.y);
+      });
+
+      requestAnimationFrame(animateParticles);
+    }
+    requestAnimationFrame(animateParticles);
+
+    window.addEventListener('resize', () => {
+      const canvas = document.getElementById('bgCanvas');
+      if (canvas) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+    });
+
+    let audioCtx = null;
+    let isPlayingAudio = false;
+
+    function toggleAudio() {
+      if (!isPlayingAudio) {
+        startMelody();
+        document.getElementById('audioIcon').className = 'fas fa-pause';
+        document.getElementById('audioText').innerText = 'Pause Melody';
+        isPlayingAudio = true;
+        showToast("Playing romantic tune 🎵");
+      } else {
+        isPlayingAudio = false;
+        document.getElementById('audioIcon').className = 'fas fa-music';
+        document.getElementById('audioText').innerText = 'Play Melody';
+        showToast("Melody paused");
+      }
+    }
+
+    function startMelody() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const notes = [261.63, 329.63, 392.00, 523.25, 440.00, 349.23];
+      let noteIdx = 0;
+
+      function playNext() {
+        if (!isPlayingAudio) return;
+        playTone(notes[noteIdx], 0.4);
+        noteIdx = (noteIdx + 1) % notes.length;
+        setTimeout(playNext, 600);
+      }
+      playNext();
+    }
+
+    function playTone(freq, duration) {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch(e) {}
+    }
+
+    function triggerConfetti() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
+    }
+
+    function openExportModal() {
+      document.getElementById('exportModal').classList.remove('hidden');
+    }
+
+    function closeExportModal() {
+      document.getElementById('exportModal').classList.add('hidden');
+    }
+
+    function downloadHtmlFile() {
+      const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${appState.partnerName.toLowerCase()}_boyfriend_day.html`;
+      a.click();
+      showToast("Downloaded website HTML!");
+    }
+
+    function copyFullCode() {
+      const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+      const textarea = document.createElement('textarea');
+      textarea.value = htmlContent;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      showToast("Code copied to clipboard!");
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').innerText = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 2500);
+    }
+
+    function escapeHtml(str) {
+      return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+  </script>
+</body>
+</html>
